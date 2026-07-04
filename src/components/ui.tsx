@@ -1,5 +1,6 @@
 import Link from "next/link";
 import NavMenu from "./NavMenu";
+import { isBeta } from "@/lib/beta";
 
 export function Logo() {
   // eslint-disable-next-line @next/next/no-img-element
@@ -25,6 +26,7 @@ export function Nav({ user, active }: { user: NavUser; active?: string }) {
         <Link className="brand" href={user ? "/dashboard" : "/"}>
           <Logo />
           Paws<b>Pair</b>
+          {isBeta() && <span className="beta-tag" title="PawsPair is in beta">BETA</span>}
         </Link>
         <NavMenu authed={!!user} isAdmin={user?.role === "ADMIN"} active={active} />
       </div>

@@ -5,7 +5,10 @@ import { SITE_URL, SITE_NAME } from "@/lib/seo";
 import PWA from "@/components/PWA";
 import AppPopups from "@/components/AppPopups";
 import CookieConsent from "@/components/CookieConsent";
+import BetaNotice from "@/components/BetaNotice";
+import FeedbackWidget from "@/components/FeedbackWidget";
 import { getCurrentUser } from "@/lib/auth";
+import { isBeta } from "@/lib/beta";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -61,13 +64,16 @@ export const viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
   const firstName = user?.ownerName?.split(" ")[0] || null;
+  const beta = isBeta();
   return (
     <html lang="en-IN" data-scroll-behavior="smooth">
       <body>
+        {beta && <BetaNotice signedIn={!!user} firstName={firstName} />}
         {children}
         <PWA />
         <AppPopups userName={firstName} />
         <CookieConsent />
+        {beta && <FeedbackWidget signedIn={!!user} />}
       </body>
     </html>
   );

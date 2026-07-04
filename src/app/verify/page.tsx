@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { Nav, Footer } from "@/components/ui";
 import { getBadges, trustLevel, trustScore, TRUST_LEVEL_STYLE } from "@/lib/trust";
+import { isBeta } from "@/lib/beta";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,11 @@ export default async function Verify(props: { searchParams: Promise<{ done?: str
             only ever see the badge, never the document.
           </p>
 
+          {isBeta() && (
+            <div className="beta-note" style={{ marginBottom: 16 }}>
+              <span>🧪 <b>Beta:</b> verification is <b>simulated</b> for now — each badge approves instantly so you can explore. Real ID, phone &amp; health checks switch on before public launch.</span>
+            </div>
+          )}
           {sp.done && <div className="ok">✓ {sp.done}.</div>}
           {sp.error && <div className="err">{sp.error}</div>}
 

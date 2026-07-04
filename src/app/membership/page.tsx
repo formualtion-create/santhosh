@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { Nav, Footer } from "@/components/ui";
 import { razorpayEnabled } from "@/lib/razorpay";
+import { isBeta } from "@/lib/beta";
 
 const PLANS = [
   { id: "SNIFF", name: "Sniff", price: "Free", sub: "forever", emoji: "🐾", feats: ["1 verified pet profile", "15 introductions / day", "Daily Paw of the Day", "Encrypted conversations"] },
@@ -26,6 +27,11 @@ export default async function Membership(props: { searchParams: Promise<{ ok?: s
             <p className="lead">You&apos;re on the <b>{user.plan[0] + user.plan.slice(1).toLowerCase()}</b> plan{user.planRenewsAt ? `, renewing ${new Date(user.planRenewsAt).toLocaleDateString("en-IN")}` : ""}. Change or cancel anytime — no lock-in.</p>
           </div>
 
+          {isBeta() && !razorpayEnabled() && (
+            <div className="beta-note" style={{ justifyContent: "center", marginBottom: 18 }}>
+              <span>🧪 <b>Beta:</b> upgrading is free to try — <b>no real payment is taken</b>. It just switches your plan so you can explore the paid features.</span>
+            </div>
+          )}
           {searchParams.ok && <div className="ok">✓ You&apos;re now on the {searchParams.ok[0] + searchParams.ok.slice(1).toLowerCase()} plan. (Simulated — no payment was taken.)</div>}
           {searchParams.error && <div className="err">{searchParams.error}</div>}
 

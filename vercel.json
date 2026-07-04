@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cp prisma/schema.mysql.prisma prisma/schema.prisma && npm run build",
   "crons": [
     { "path": "/api/cron/daily-thought", "schedule": "0 9 * * *" }
   ]

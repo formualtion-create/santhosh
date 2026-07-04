@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { Nav, Footer } from "@/components/ui";
 import LocationPicker from "@/components/LocationPicker";
+import { betaInviteRequired } from "@/lib/beta";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -31,6 +32,16 @@ export default async function Signup(props: { searchParams: Promise<{ error?: st
           {searchParams.error && <div className="err">{searchParams.error}</div>}
 
           <form action="/api/auth/signup" method="post" className="card">
+            {betaInviteRequired() && (
+              <div className="invite-box">
+                <div className="invite-box__head">🎟️ Invite-only beta</div>
+                <p className="invite-box__sub">PawsPair is in private beta. Enter the invite code you were given to join.</p>
+                <div className="field" style={{ margin: 0 }}>
+                  <label htmlFor="betaCode">Beta invite code *</label>
+                  <input id="betaCode" name="betaCode" required autoComplete="off" placeholder="Enter your code" />
+                </div>
+              </div>
+            )}
             <h3 style={{ marginBottom: 14 }}>1 · Account</h3>
             <div className="fg2">
               <div className="field"><label htmlFor="email">Email *</label><input id="email" name="email" type="email" autoComplete="email" required placeholder="you@example.com" /></div>

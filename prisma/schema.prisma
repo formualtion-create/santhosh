@@ -277,3 +277,17 @@ model PushSubscription {
 
   @@index([userId])
 }
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String?  // logged-in tester, if any
+  email     String?  // captured for follow-up
+  category  String   // bug | idea | confusing | praise | other
+  message   String
+  url       String?  // page the tester was on
+  status    String   @default("NEW") // NEW | SEEN | RESOLVED
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}

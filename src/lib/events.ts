@@ -4,7 +4,7 @@ import { prisma } from "./db";
 export type EventType =
   | "signup" | "login" | "swipe_like" | "swipe_pass" | "match" | "message"
   | "search" | "subscribe" | "review" | "checkin" | "story_submit"
-  | "newsletter" | "badge" | "photo_upload";
+  | "newsletter" | "badge" | "photo_upload" | "feedback";
 
 // Fire-and-forget analytics logger. NEVER blocks or throws into the request path.
 export function logEvent(type: EventType, opts: { userId?: string | null; meta?: Record<string, unknown> } = {}) {

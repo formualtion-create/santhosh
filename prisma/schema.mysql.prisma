@@ -270,10 +270,24 @@ model PushSubscription {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  endpoint  String   @unique @db.Text
+  endpoint  String   @unique @db.VarChar(500)
   p256dh    String   @db.Text
   auth      String
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String?
+  email     String?
+  category  String
+  message   String   @db.Text
+  url       String?
+  status    String   @default("NEW")
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
 }

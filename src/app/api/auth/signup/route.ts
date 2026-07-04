@@ -5,11 +5,21 @@ import { signupSchema } from "@/lib/validation";
 import { rateLimit, clientIp, sameOrigin, tooMany } from "@/lib/security";
 import { issueAndSendOtp } from "@/lib/otp";
 import { logEvent } from "@/lib/events";
+import { betaInviteRequired, checkBetaCode } from "@/lib/beta";
 
 export async function POST(req: NextRequest) {
   if (!sameOrigin(req)) return NextResponse.json({ error: "Bad origin" }, { status: 403 });
   if (!rateLimit("signup:" + clientIp(req), 5, 60_000)) return tooMany(req, "/signup");
   const form = Object.fromEntries((await req.formData()).entries());
+
+  // Beta gate: block signup unless a valid invite code is supplied.
+  if (betaInviteRequired() && !checkBetaCode(form.betaCode)) {
+    return NextResponse.redirect(
+      new URL("/signup?error=" + encodeURIComponent("That beta invite code isn't valid. Please check it and try again."), req.url),
+      303
+    );
+  }
+
   const parsed = signupSchema.safeParse(form);
   if (!parsed.success) {
     const msg = parsed.error.issues[0]?.message || "Please check your details";

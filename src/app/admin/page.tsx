@@ -32,6 +32,9 @@ export default async function Admin(props: { searchParams: Promise<{ sent?: stri
     prisma.event.groupBy({ by: ["type"], _count: { type: true } }),
     prisma.event.findMany({ orderBy: { createdAt: "desc" }, take: 15 }),
   ]);
+  const feedback = await prisma.feedback.findMany({ orderBy: { createdAt: "desc" }, take: 40 });
+  const newFeedback = feedback.filter((f) => f.status === "NEW").length;
+  const FB_LABEL: Record<string, string> = { bug: "🐞 Bug", confusing: "😕 Confusing", idea: "💡 Idea", praise: "💜 Praise", other: "💬 Other" };
   const pendingStories = stories.filter((s) => s.status === "PENDING");
   const eventCounts = eventsByType.map((e) => ({ type: e.type, n: e._count.type })).sort((a, b) => b.n - a.n);
 
@@ -51,6 +54,31 @@ export default async function Admin(props: { searchParams: Promise<{ sent?: stri
               <p className="muted" style={{ fontSize: ".9rem" }}>Push today&apos;s love &amp; care thought to all members who enabled notifications. (Schedule daily in production via <code>/api/cron/daily-thought</code>.)</p>
             </div>
             <form action="/api/admin" method="post"><input type="hidden" name="action" value="send-thought" /><button className="btn btn-primary btn-sm" type="submit">Send now</button></form>
+          </div>
+
+          <div className="spread" style={{ marginBottom: 10 }}>
+            <h3 style={{ margin: 0 }}>🧪 Beta feedback ({feedback.length}){newFeedback > 0 && <span className="chip acc" style={{ marginLeft: 8 }}>{newFeedback} new</span>}</h3>
+            <a className="btn btn-ghost btn-sm" href="/api/admin/feedback">⬇ Export CSV</a>
+          </div>
+          <div className="card" style={{ marginBottom: 24 }}>
+            {feedback.length === 0 ? (
+              <p className="muted">No feedback yet. Testers can send it from the floating button anywhere in the app.</p>
+            ) : (
+              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 12 }}>
+                {feedback.map((f) => (
+                  <li key={f.id} style={{ borderBottom: "1px solid var(--border)", paddingBottom: 12 }}>
+                    <div className="row" style={{ gap: 8, marginBottom: 4 }}>
+                      <span className="chip honey" style={{ fontSize: ".72rem" }}>{FB_LABEL[f.category] || f.category}</span>
+                      {f.status === "NEW" && <span className="chip acc" style={{ fontSize: ".72rem" }}>new</span>}
+                      {f.url && <span className="muted" style={{ fontSize: ".78rem", fontFamily: "monospace" }}>{f.url}</span>}
+                      <span className="muted" style={{ fontSize: ".78rem", marginLeft: "auto" }}>{new Date(f.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
+                    <p style={{ fontSize: ".94rem", color: "var(--text)", whiteSpace: "pre-wrap" }}>{f.message}</p>
+                    {f.email && <p className="muted" style={{ fontSize: ".8rem", marginTop: 3 }}>— {f.email}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <h3 style={{ marginBottom: 10 }}>Pending verification ({pending.length})</h3>
