@@ -1,0 +1,293 @@
+// PawsPair — data model (SQLite for local dev; swap provider to mysql/postgres for prod)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  ownerName     String
+  phone         String
+  city          String
+  lat           Float?
+  lng           Float?
+  role          String   @default("MEMBER") // MEMBER | ADMIN
+
+  // KYC / verification (simulated)
+  kycStatus     String   @default("PENDING") // PENDING | IN_REVIEW | VERIFIED | REJECTED
+  kycDocType    String?
+  kycDocRef     String?
+  verifiedAt    DateTime?
+  bannedAt      DateTime?
+
+  // Trust badges (owner-level) — earned via the Verification Center (simulated)
+  phoneVerified    Boolean @default(false)
+  selfieVerified   Boolean @default(false)  // owner liveness / photo authenticity
+  socialVerified   Boolean @default(false)
+  socialUrl        String?
+  locationVerified Boolean @default(false)
+
+  // Privacy controls
+  photoPrivacy      String  @default("PUBLIC") // PUBLIC | MATCHED (blur pet photo until matched)
+  hideExactLocation Boolean @default(false)    // show only city/approx distance on the map
+
+  // email verification (OTP)
+  emailVerified Boolean  @default(false)
+  emailOtp      String?
+  emailOtpExp   DateTime?
+
+  // password reset (simulated token)
+  resetToken    String?
+  resetTokenExp DateTime?
+
+  // legal acceptance
+  declarationAcceptedAt DateTime?
+
+  // Subscription (simulated by default; real via Razorpay when configured)
+  plan              String   @default("SNIFF")
+  planRenewsAt      DateTime?
+  razorpayCustomerId String?
+  razorpaySubId      String?  @unique
+
+  // DPDP / consent
+  consentDPDP   Boolean  @default(false)
+  consentMarketing Boolean @default(false)
+  acceptedTermsAt DateTime?
+
+  // Notification preferences
+  notifyMatches  Boolean @default(true)
+  notifyMessages Boolean @default(true)
+  notifyTips     Boolean @default(true)
+
+  pets          Pet[]
+  likesGiven    Like[]    @relation("likeFrom")
+  likesReceived Like[]    @relation("likeTo")
+  messages      Message[]
+  reportsMade   Report[]  @relation("reporter")
+  blocksMade    Block[]   @relation("blocker")
+  pushSubs      PushSubscription[]
+  reviewsWritten  Review[] @relation("reviewAuthor")
+  reviewsReceived Review[] @relation("reviewSubject")
+  checkIns      CheckIn[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Pet {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  species     String
+  breed       String?
+  ageBand     String
+  gender      String
+  neutered    Boolean  @default(false)
+  size        String?
+  energy      String
+  temperament String?
+  intent      String
+  bio         String?
+  interests   String?  // comma-separated vibe tags, e.g. "Fetch, Beach days, Cuddles"
+  favActivity String?  // one favourite thing, e.g. "Chasing frisbees"
+  photoUrl    String?
+  vaccinated  Boolean  @default(false)
+
+  // Pet health & ownership trust (PawsPair-specific badges)
+  healthVerified    Boolean @default(false) // vet certificate / vaccination record verified
+  healthDocRef      String?                 // masked reference to the uploaded vet doc
+  microchipId       String?                 // masked, e.g. "•••• 4821"
+  microchipVerified Boolean @default(false)
+
+  city        String
+  lat         Float
+  lng         Float
+
+  likes       Like[]
+  createdAt   DateTime @default(now())
+}
+
+// A swipe action on a pet (and, denormalised, its owner)
+model Like {
+  id         String   @id @default(cuid())
+  fromUserId String
+  fromUser   User     @relation("likeFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toPetId    String
+  toPet      Pet      @relation(fields: [toPetId], references: [id], onDelete: Cascade)
+  toUserId   String
+  toUser     User     @relation("likeTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  action     String // LIKE | PASS
+  createdAt  DateTime @default(now())
+
+  @@unique([fromUserId, toPetId])
+  @@index([toUserId])
+}
+
+// A mutual match between two users (ordered userAId < userBId)
+model Match {
+  id        String    @id @default(cuid())
+  userAId   String
+  userBId   String
+  createdAt DateTime  @default(now())
+  messages  Message[]
+
+  @@unique([userAId, userBId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body      String
+  imageUrl  String?  // photo shared in chat
+  flagged   Boolean  @default(false) // tripped the in-chat scam/abuse scanner
+  createdAt DateTime @default(now())
+
+  @@index([matchId])
+}
+
+model Report {
+  id           String   @id @default(cuid())
+  reporterId   String
+  reporter     User     @relation("reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetUserId String
+  reason       String
+  details      String?
+  status       String   @default("OPEN") // OPEN | ACTIONED | DISMISSED
+  createdAt    DateTime @default(now())
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blocker   User     @relation("blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+}
+
+// Post-playdate reputation: an owner reviews another owner they matched with.
+model Review {
+  id            String   @id @default(cuid())
+  authorId      String
+  author        User     @relation("reviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  subjectId     String
+  subject       User     @relation("reviewSubject", fields: [subjectId], references: [id], onDelete: Cascade)
+  rating        Int      // 1..5
+  comment       String?
+  createdAt     DateTime @default(now())
+
+  @@unique([authorId, subjectId])
+  @@index([subjectId])
+}
+
+// Safety check-in: a planned meetup a member can share with a trusted contact.
+model CheckIn {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  place     String
+  meetAt    DateTime?
+  withName  String?  // who they are meeting (the match's pet/owner)
+  status    String   @default("PLANNED") // PLANNED | SAFE
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Curated pet-services directory (vets, groomers, walkers, daycares, stores).
+model PetService {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // VET | GROOMER | WALKER | DAYCARE | STORE
+  city      String
+  area      String?
+  lat       Float
+  lng       Float
+  phone     String?
+  rating    Float?
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([city])
+}
+
+// Member-submitted "Happy Tail" stories, moderated before they appear publicly.
+model StorySubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  petName   String
+  species   String?
+  city      String?
+  rating    Int      @default(5)
+  story     String
+  status    String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([status])
+}
+
+// Data-collection layer: every meaningful thing a member feeds in / does.
+// Powers product analytics & the admin "Activity & data" view. userId is a loose
+// reference (no FK) and is purged on account deletion for DPDP compliance.
+model Event {
+  id        String   @id @default(cuid())
+  userId    String?
+  type      String   // signup | login | swipe_like | swipe_pass | match | message | search | subscribe | review | checkin | story_submit | newsletter | badge | photo_upload
+  meta      String?  // JSON context (species, city, plan, rating, …)
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  mobile    String
+  species   String
+  petName   String
+  petAge    String
+  createdAt DateTime @default(now())
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String?  // logged-in tester, if any
+  email     String?  // captured for follow-up
+  category  String   // bug | idea | confusing | praise | other
+  message   String
+  url       String?  // page the tester was on
+  status    String   @default("NEW") // NEW | SEEN | RESOLVED
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}
