@@ -1,0 +1,279 @@
+// PRODUCTION schema for PlanetScale / MySQL.
+// To use: copy this over prisma/schema.prisma, set DATABASE_URL to your PlanetScale
+// connection string, then run:  npx prisma db push
+//
+// Notes:
+// - PlanetScale (Vitess) does not support foreign-key constraints, so we use
+//   relationMode = "prisma" and add @@index on every relation scalar field.
+// - Long free-text fields use @db.Text (MySQL default String is VARCHAR(191)).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  passwordHash       String
+  ownerName          String
+  phone              String
+  city               String
+  lat                Float?
+  lng                Float?
+  role               String    @default("MEMBER")
+
+  kycStatus          String    @default("PENDING")
+  kycDocType         String?
+  kycDocRef          String?
+  verifiedAt         DateTime?
+  bannedAt           DateTime?
+
+  phoneVerified      Boolean   @default(false)
+  selfieVerified     Boolean   @default(false)
+  socialVerified     Boolean   @default(false)
+  socialUrl          String?
+  locationVerified   Boolean   @default(false)
+
+  photoPrivacy       String    @default("PUBLIC")
+  hideExactLocation  Boolean   @default(false)
+
+  emailVerified      Boolean   @default(false)
+  emailOtp           String?
+  emailOtpExp        DateTime?
+
+  resetToken         String?
+  resetTokenExp      DateTime?
+
+  declarationAcceptedAt DateTime?
+
+  plan               String    @default("SNIFF")
+  planRenewsAt       DateTime?
+  razorpayCustomerId String?
+  razorpaySubId      String?   @unique
+
+  consentDPDP        Boolean   @default(false)
+  consentMarketing   Boolean   @default(false)
+  acceptedTermsAt    DateTime?
+
+  notifyMatches  Boolean @default(true)
+  notifyMessages Boolean @default(true)
+  notifyTips     Boolean @default(true)
+
+  pets          Pet[]
+  likesGiven    Like[]    @relation("likeFrom")
+  likesReceived Like[]    @relation("likeTo")
+  messages      Message[]
+  reportsMade   Report[]  @relation("reporter")
+  blocksMade    Block[]   @relation("blocker")
+  pushSubs      PushSubscription[]
+  reviewsWritten  Review[] @relation("reviewAuthor")
+  reviewsReceived Review[] @relation("reviewSubject")
+  checkIns      CheckIn[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Pet {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  species     String
+  breed       String?
+  ageBand     String
+  gender      String
+  neutered    Boolean  @default(false)
+  size        String?
+  energy      String
+  temperament String?  @db.Text
+  intent      String
+  bio         String?  @db.Text
+  interests   String?  @db.Text
+  favActivity String?
+  photoUrl    String?
+  vaccinated  Boolean  @default(false)
+
+  healthVerified    Boolean @default(false)
+  healthDocRef      String?
+  microchipId       String?
+  microchipVerified Boolean @default(false)
+
+  city        String
+  lat         Float
+  lng         Float
+
+  likes       Like[]
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Like {
+  id         String   @id @default(cuid())
+  fromUserId String
+  fromUser   User     @relation("likeFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toPetId    String
+  toPet      Pet      @relation(fields: [toPetId], references: [id], onDelete: Cascade)
+  toUserId   String
+  toUser     User     @relation("likeTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  action     String
+  createdAt  DateTime @default(now())
+
+  @@unique([fromUserId, toPetId])
+  @@index([toUserId])
+  @@index([toPetId])
+  @@index([fromUserId])
+}
+
+model Match {
+  id        String    @id @default(cuid())
+  userAId   String
+  userBId   String
+  createdAt DateTime  @default(now())
+  messages  Message[]
+
+  @@unique([userAId, userBId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body      String   @db.Text
+  imageUrl  String?
+  flagged   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([matchId])
+  @@index([senderId])
+}
+
+model Report {
+  id           String   @id @default(cuid())
+  reporterId   String
+  reporter     User     @relation("reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetUserId String
+  reason       String
+  details      String?  @db.Text
+  status       String   @default("OPEN")
+  createdAt    DateTime @default(now())
+
+  @@index([reporterId])
+  @@index([status])
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blocker   User     @relation("blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+}
+
+model Review {
+  id            String   @id @default(cuid())
+  authorId      String
+  author        User     @relation("reviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  subjectId     String
+  subject       User     @relation("reviewSubject", fields: [subjectId], references: [id], onDelete: Cascade)
+  rating        Int
+  comment       String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  @@unique([authorId, subjectId])
+  @@index([subjectId])
+  @@index([authorId])
+}
+
+model CheckIn {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  place     String
+  meetAt    DateTime?
+  withName  String?
+  status    String   @default("PLANNED")
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PetService {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  city      String
+  area      String?
+  lat       Float
+  lng       Float
+  phone     String?
+  rating    Float?
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([city])
+}
+
+model StorySubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  petName   String
+  species   String?
+  city      String?
+  rating    Int      @default(5)
+  story     String   @db.Text
+  status    String   @default("PENDING")
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([status])
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  userId    String?
+  type      String
+  meta      String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  mobile    String
+  species   String
+  petName   String
+  petAge    String
+  createdAt DateTime @default(now())
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique @db.Text
+  p256dh    String   @db.Text
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
