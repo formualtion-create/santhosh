@@ -12,9 +12,12 @@ export default function BetaNotice({ signedIn, firstName }: { signedIn: boolean;
   const [welcome, setWelcome] = useState(false);
 
   useEffect(() => {
+    // Don't cover the OTP / verification screens with the welcome modal — wait
+    // until the tester is actually inside the app.
+    const authPath = typeof window !== "undefined" && /^\/(login|signup|verify)/.test(window.location.pathname);
     try {
       if (localStorage.getItem(BANNER_KEY) !== "1") setBanner(true);
-      if (signedIn && localStorage.getItem(WELCOME_KEY) !== "1") setWelcome(true);
+      if (signedIn && !authPath && localStorage.getItem(WELCOME_KEY) !== "1") setWelcome(true);
     } catch { /* storage blocked — show nothing rather than break */ }
   }, [signedIn]);
 

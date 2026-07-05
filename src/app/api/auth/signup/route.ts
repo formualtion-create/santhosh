@@ -5,7 +5,7 @@ import { signupSchema } from "@/lib/validation";
 import { rateLimit, clientIp, sameOrigin, tooMany } from "@/lib/security";
 import { issueAndSendOtp } from "@/lib/otp";
 import { logEvent } from "@/lib/events";
-import { betaInviteRequired, checkBetaCode } from "@/lib/beta";
+import { betaInviteRequired, checkBetaCode, isBeta } from "@/lib/beta";
 
 export async function POST(req: NextRequest) {
   if (!sameOrigin(req)) return NextResponse.json({ error: "Bad origin" }, { status: 403 });
@@ -44,7 +44,11 @@ export async function POST(req: NextRequest) {
       city: d.city,
       lat: d.lat,
       lng: d.lng,
-      kycStatus: "IN_REVIEW",
+      // Beta: ID is simulated, so auto-verify to skip the extra gate and let testers
+      // reach Discover right after the email code. Production keeps real review.
+      ...(isBeta()
+        ? { kycStatus: "VERIFIED" as const, verifiedAt: new Date(), locationVerified: true }
+        : { kycStatus: "IN_REVIEW" as const }),
       kycDocType: d.kycDocType,
       kycDocRef: `${d.kycDocType} ••••${d.kycDocLast4}`,
       consentDPDP: true,

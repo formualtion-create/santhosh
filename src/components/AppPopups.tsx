@@ -28,9 +28,14 @@ export default function AppPopups({ userName }: { userName?: string | null }) {
   const [welcome, setWelcome] = useState(false);
   const [sub, setSub] = useState(false);
 
-  // Welcome "thought of the day" — once per app open (session)
+  // Welcome "thought of the day" — once per app open (session).
+  // Suppressed during beta (the beta welcome covers it) and on auth/verify screens,
+  // so we never stack two modals or cover the OTP entry.
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const beta = process.env.NEXT_PUBLIC_BETA !== "0";
+    const authPath = /^\/(login|signup|verify)/.test(window.location.pathname);
+    if (beta || authPath) return;
     if (sessionStorage.getItem("pp_welcome_seen") !== "1") {
       const t = setTimeout(() => setWelcome(true), 700);
       return () => clearTimeout(t);

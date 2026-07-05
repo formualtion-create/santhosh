@@ -5,7 +5,7 @@ export const signupSchema = z.object({
   email: z.string().email("Enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   // owner
-  ownerName: z.string().min(2, "Enter your full name"),
+  ownerName: z.string().trim().min(2, "Enter your full name"),
   phone: z
     .string()
     .transform((s) => s.replace(/[^\d+]/g, ""))
@@ -17,7 +17,7 @@ export const signupSchema = z.object({
   kycDocType: z.enum(["AADHAAR", "PASSPORT", "DL", "VOTER"]),
   kycDocLast4: z.string().regex(/^\d{4}$/, "Enter the last 4 digits"),
   // pet
-  petName: z.string().min(1, "Enter your pet's name"),
+  petName: z.string().trim().min(1, "Enter your pet's name"),
   species: z.enum(["DOG", "CAT", "RABBIT", "BIRD", "OTHER"]),
   breed: z.string().optional(),
   ageBand: z.enum(["PUPPY", "YOUNG", "ADULT", "SENIOR"]),

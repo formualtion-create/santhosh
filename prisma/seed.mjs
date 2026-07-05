@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 const prisma = new PrismaClient();
 
@@ -56,6 +57,14 @@ const PRIVACY = {
 };
 
 async function main() {
+  // Idempotent guard: if the demo set already exists, do nothing. This makes the
+  // seed safe to run on every production deploy — it never wipes real testers.
+  const already = await prisma.user.findUnique({ where: { email: "ananya@example.com" } });
+  if (already) {
+    console.log("Demo data already present — skipping seed (no data touched).");
+    return;
+  }
+
   await prisma.message.deleteMany();
   await prisma.match.deleteMany();
   await prisma.like.deleteMany();
@@ -69,7 +78,9 @@ async function main() {
   await prisma.pet.deleteMany();
   await prisma.user.deleteMany();
 
-  const hash = await bcrypt.hash("password123", 12);
+  // Demo pet-owner accounts exist only to populate the feed — give them a strong
+  // random password so nobody can log in as them on a public beta.
+  const hash = await bcrypt.hash(crypto.randomBytes(24).toString("base64"), 12);
   const ids = {}; // email -> { userId, petId }
 
   for (const m of members) {
@@ -104,7 +115,7 @@ async function main() {
   // Admin account
   await prisma.user.create({
     data: {
-      email: "admin@pawspair.in", passwordHash: await bcrypt.hash("admin12345", 12),
+      email: "admin@pawspair.in", passwordHash: await bcrypt.hash(process.env.ADMIN_SEED_PASSWORD || crypto.randomBytes(18).toString("base64"), 12),
       ownerName: "PawsPair Admin", phone: "+919000000001", city: "Bengaluru", role: "ADMIN",
       kycStatus: "VERIFIED", verifiedAt: new Date(), emailVerified: true, declarationAcceptedAt: new Date(), consentDPDP: true, acceptedTermsAt: new Date(),
     },
