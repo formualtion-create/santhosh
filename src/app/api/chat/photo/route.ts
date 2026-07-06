@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
-import path from "path";
 import { prisma } from "@/lib/db";
 import { getSessionUserId } from "@/lib/auth";
 import { sameOrigin, rateLimit } from "@/lib/security";
 import { sendPushToUser } from "@/lib/push";
 import { logEvent } from "@/lib/events";
+import { saveImage } from "@/lib/storage";
 
 function sniffImage(buf: Buffer): "png" | "jpg" | "webp" | null {
   if (buf.length > 8 && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return "png";
@@ -34,9 +33,9 @@ export async function POST(req: NextRequest) {
   const ext = sniffImage(bytes);
   if (!ext) return NextResponse.redirect(new URL("/chat/" + matchId + "?error=JPG%2C+PNG+or+WebP+only", req.url), 303);
 
-  const name = `chat-${matchId}-${uid.slice(-4)}-${bytes.length}.${ext}`;
-  await writeFile(path.join(process.cwd(), "public", "uploads", name), bytes);
-  await prisma.message.create({ data: { matchId, senderId: uid, body: "📷 Photo", imageUrl: `/uploads/${name}` } });
+  const name = `chat-${matchId}-${uid.slice(-4)}-${Date.now()}.${ext}`;
+  const imageUrl = await saveImage(name, bytes, ext);
+  await prisma.message.create({ data: { matchId, senderId: uid, body: "📷 Photo", imageUrl } });
   logEvent("photo_upload", { userId: uid, meta: { kind: "chat", matchId } });
 
   const otherId = m.userAId === uid ? m.userBId : m.userAId;

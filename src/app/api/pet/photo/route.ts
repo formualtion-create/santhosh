@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
-import path from "path";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { sameOrigin, rateLimit } from "@/lib/security";
 import { logEvent } from "@/lib/events";
+import { saveImage } from "@/lib/storage";
 
 // Detects the true image type from the file's magic bytes, so a spoofed
 // Content-Type (e.g. an HTML/SVG payload labelled image/png) can't slip through.
@@ -35,9 +34,9 @@ export async function POST(req: NextRequest) {
   if (!ext) return NextResponse.redirect(new URL("/account?error=JPG%2C+PNG+or+WebP+only", req.url), 303);
 
   const name = `${pet.id}-${Date.now()}.${ext}`;
-  await writeFile(path.join(process.cwd(), "public", "uploads", name), bytes);
+  const photoUrl = await saveImage(name, bytes, ext);
 
-  await prisma.pet.update({ where: { id: pet.id }, data: { photoUrl: `/uploads/${name}` } });
+  await prisma.pet.update({ where: { id: pet.id }, data: { photoUrl } });
   logEvent("photo_upload", { userId: user.id, meta: { kind: "pet" } });
   return NextResponse.redirect(new URL("/account?photo=1", req.url), 303);
 }

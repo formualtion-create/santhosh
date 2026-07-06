@@ -140,6 +140,13 @@ export async function areMatched(userA: string, userB: string): Promise<boolean>
   return !!m;
 }
 
+// The match id between two users (for linking straight to their chat), or null.
+export async function getMatchId(userA: string, userB: string): Promise<string | null> {
+  const [a, b] = [userA, userB].sort();
+  const m = await prisma.match.findUnique({ where: { userAId_userBId: { userAId: a, userBId: b } }, select: { id: true } });
+  return m?.id ?? null;
+}
+
 // Reputation: average rating + count for a member.
 export async function getReputation(userId: string): Promise<{ avg: number; count: number }> {
   const agg = await prisma.review.aggregate({ where: { subjectId: userId }, _avg: { rating: true }, _count: true });

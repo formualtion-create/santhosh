@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { getPet, areMatched, getReputation, getReviews } from "@/lib/data";
+import { getPet, getMatchId, getReputation, getReviews } from "@/lib/data";
 import { distanceKm } from "@/lib/geo";
 import { compatibility, type PetAttrs } from "@/lib/match";
 import { Nav, Footer, VerifiedTick } from "@/components/ui";
@@ -25,8 +25,9 @@ export default async function Profile(
   if (!pet || pet.user.kycStatus !== "VERIFIED") notFound();
   const ownerId = pet.user.id;
   const self = ownerId === user.id;
+  const matchId = self ? null : await getMatchId(user.id, ownerId);
 
-  const matched = self ? true : await areMatched(user.id, ownerId);
+  const matched = self ? true : !!matchId;
   const photoBlurred = !self && !matched && pet.user.photoPrivacy === "MATCHED";
   const approx = !!pet.user.hideExactLocation && !self;
 
@@ -105,19 +106,25 @@ export default async function Profile(
 
             <div style={{ display: "grid", gap: 18, alignContent: "start" }}>
               <div className="card pf-connect">
-                <h3 style={{ marginBottom: 10 }}>Connect safely</h3>
+                <h3 style={{ marginBottom: 10 }}>{matched ? "You're connected 🐾" : "Connect safely"}</h3>
                 <p className="muted" style={{ fontSize: ".92rem", marginBottom: 14 }}>
-                  Parent-first &amp; consent-based — liking opens an encrypted chat only once {pet.name}&rsquo;s family likes you back.
+                  {matched
+                    ? `You and ${pet.name}'s family matched. Say hello — your chat is private and encrypted.`
+                    : <>Parent-first &amp; consent-based — liking opens an encrypted chat only once {pet.name}&rsquo;s family likes you back.</>}
                 </p>
                 {self ? (
                   <p className="muted">This is your own profile.</p>
                 ) : (
                   <>
-                    <form action="/api/swipe" method="post">
-                      <input type="hidden" name="petId" value={pet.id} /><input type="hidden" name="action" value="LIKE" />
-                      <input type="hidden" name="next" value={`/profile/${pet.id}?liked=1`} />
-                      <button className="btn btn-primary btn-block" type="submit">♥ Like {pet.name}</button>
-                    </form>
+                    {matched ? (
+                      <Link href={`/chat/${matchId}`} className="btn btn-primary btn-block">💬 Message {pet.name}</Link>
+                    ) : (
+                      <form action="/api/swipe" method="post">
+                        <input type="hidden" name="petId" value={pet.id} /><input type="hidden" name="action" value="LIKE" />
+                        <input type="hidden" name="next" value={`/profile/${pet.id}?liked=1`} />
+                        <button className="btn btn-primary btn-block" type="submit">♥ Like {pet.name}</button>
+                      </form>
+                    )}
                     <details style={{ marginTop: 12 }}>
                       <summary className="muted" style={{ cursor: "pointer", fontSize: ".9rem" }}>Report or block</summary>
                       <form action="/api/report" method="post" style={{ marginTop: 10 }}>
