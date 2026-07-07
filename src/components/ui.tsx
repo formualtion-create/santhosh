@@ -3,8 +3,27 @@ import NavMenu from "./NavMenu";
 import { isBeta } from "@/lib/beta";
 
 export function Logo() {
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img className="lg" src="/logo.png" alt="" aria-hidden width={40} height={40} />;
+  // Modern inline SVG mark — a paw whose main pad is a heart, set in a brand
+  // gradient tile. Crisp at any size and theme-aware (no raster logo.png).
+  return (
+    <svg className="lg" viewBox="0 0 48 48" width={42} height={42} role="img" aria-label="PawsPair" focusable="false">
+      <defs>
+        <linearGradient id="pp-logo-g" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#6D5EF6" />
+          <stop offset="0.55" stopColor="#A855F7" />
+          <stop offset="1" stopColor="#E0457B" />
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="48" height="48" rx="13" fill="url(#pp-logo-g)" />
+      <g fill="#fff" fillOpacity="0.97">
+        <ellipse cx="13" cy="19" rx="3" ry="4.1" transform="rotate(-20 13 19)" />
+        <ellipse cx="20" cy="13.5" rx="3.3" ry="4.4" />
+        <ellipse cx="28" cy="13.5" rx="3.3" ry="4.4" />
+        <ellipse cx="35" cy="19" rx="3" ry="4.1" transform="rotate(20 35 19)" />
+        <path d="M24 39C17 33.5 15 30 15 27C15 24.5 16.8 23 19 23C21 23 22.8 24.2 24 26C25.2 24.2 27 23 29 23C31.2 23 33 24.5 33 27C33 30 31 33.5 24 39Z" />
+      </g>
+    </svg>
+  );
 }
 
 export function VerifiedTick() {

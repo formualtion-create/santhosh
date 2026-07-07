@@ -27,7 +27,7 @@ a{color:inherit;text-decoration:none}
 .nav{position:sticky;top:0;z-index:50;background:rgba(247,247,251,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
 .nav-in{display:flex;align-items:center;justify-content:space-between;height:68px}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--font-d);font-weight:900;font-size:1.3rem;color:var(--fg)}
-.brand .lg{width:42px;height:42px;border-radius:50%;object-fit:contain;display:block;flex-shrink:0}
+.brand .lg{width:42px;height:42px;border-radius:13px;display:block;flex-shrink:0;box-shadow:0 4px 12px -3px rgba(109,94,246,.5)}
 .brand b{color:var(--accent)}
 .nav-links{display:flex;align-items:center;gap:6px}
 .nav-links a{font-family:var(--font-d);font-weight:700;padding:8px 14px;border-radius:var(--pill);font-size:.95rem;transition:background .2s}
@@ -409,10 +409,22 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .pf-hero__score{position:absolute;top:16px;right:16px;z-index:2;width:66px;height:66px;border-radius:50%;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(0,0,0,.22);display:grid;place-items:center;text-align:center;line-height:1}
 .pf-hero__score b{font-family:var(--font-d);font-weight:900;font-size:1.16rem;color:var(--success)}
 .pf-hero__score span{font-size:.54rem;font-weight:800;letter-spacing:.5px;color:var(--muted-text);text-transform:uppercase;display:block;margin-top:2px}
-.pf-health{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.pf-health{display:flex;flex-wrap:wrap;gap:9px}
 .pf-health__item{display:inline-flex;align-items:center;gap:7px;background:var(--muted);color:var(--muted-text);border-radius:var(--r-sm);padding:8px 12px;font-size:.85rem;font-weight:600}
 .pf-health__item.on{background:#ECFDF5;color:#047857}
 .pf-connect{position:sticky;top:88px}
+/* Profile details — clean, sectioned layout (declutters the pet details card) */
+.pf-body{padding:8px 26px 26px}
+.pf-section{padding:20px 0;border-top:1px solid var(--border)}
+.pf-section:first-child{border-top:none}
+.pf-section__label{font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--primary-600);margin-bottom:13px}
+.pf-section p{line-height:1.6}
+.pf-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 14px}
+@media(max-width:520px){.pf-stats{grid-template-columns:repeat(2,1fr)}}
+.pf-stat__k{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted-text);margin-bottom:3px}
+.pf-stat__v{font-weight:700;color:var(--fg);font-size:.98rem}
+.pf-why{background:var(--muted);border-radius:var(--r-sm);padding:14px 16px}
+.pf-why .pf-section__label{margin-bottom:9px}
 
 /* ── Matches list ─────────────────────────────────────────── */
 .matchlist{list-style:none;display:grid;gap:12px;padding:0;margin:0}

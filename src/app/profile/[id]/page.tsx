@@ -64,43 +64,58 @@ export default async function Profile(
                   <p>{(pet.breed ? pet.breed + " · " : "") + SPECIES_LABEL[pet.species]} · {AGE_LABEL[pet.ageBand]} · {pet.city} · {approx ? "~" : ""}{dist} km away</p>
                 </div>
               </div>
-              <div style={{ padding: 26 }}>
+              <div className="pf-body">
                 {comp && comp.reasons.length > 0 && (
-                  <div className="card" style={{ marginTop: 0, marginBottom: 16, background: "var(--muted)", padding: "12px 14px", boxShadow: "none" }}>
-                    <b style={{ fontSize: ".8rem", textTransform: "uppercase", letterSpacing: ".5px", color: "var(--primary-600)" }}>✨ Why you match</b>
-                    <div className="row" style={{ marginTop: 8 }}>{comp.reasons.map((r) => <span key={r} className="chip">{r}</span>)}</div>
+                  <div className="pf-section">
+                    <div className="pf-why">
+                      <div className="pf-section__label">✨ Why you match</div>
+                      <div className="row">{comp.reasons.map((r) => <span key={r} className="chip">{r}</span>)}</div>
+                    </div>
                   </div>
                 )}
 
-                <h3 style={{ fontSize: "1rem", marginBottom: 2 }}>Health &amp; safety</h3>
-                <div className="pf-health">
-                  <span className={"pf-health__item" + (pet.vaccinated ? " on" : "")}>💉 {pet.vaccinated ? "Vaccinated" : "Vaccination unconfirmed"}</span>
-                  {pet.healthVerified && <span className="pf-health__item on">🩺 Vet health-verified</span>}
-                  {pet.neutered && <span className="pf-health__item on">✂️ Neutered</span>}
-                  {pet.microchipVerified && <span className="pf-health__item on">🆔 Microchip verified</span>}
+                <div className="pf-section">
+                  <div className="pf-section__label">Quick facts</div>
+                  <div className="pf-stats">
+                    <Stat k="Species" v={SPECIES_LABEL[pet.species]} />
+                    <Stat k="Age" v={AGE_LABEL[pet.ageBand]} />
+                    <Stat k="Energy" v={pet.energy === "HIGH" ? "High energy" : pet.energy === "LOW" ? "Calm" : "Balanced"} />
+                    <Stat k="Looking for" v={INTENT_LABEL[pet.intent]} />
+                    {pet.size && <Stat k="Size" v={pet.size[0] + pet.size.slice(1).toLowerCase()} />}
+                    <Stat k="Gender" v={pet.gender === "MALE" ? "Male" : "Female"} />
+                  </div>
                 </div>
 
-                <h3 style={{ fontSize: "1rem", margin: "20px 0 8px" }}>Verified badges</h3>
-                <BadgeRow user={pet.user} pet={petPet} />
-
-                <h3 style={{ fontSize: "1rem", margin: "20px 0 8px" }}>About {pet.name}</h3>
-                {pet.bio ? <p>{pet.bio}</p> : <p className="muted">No bio yet.</p>}
-                <div className="row" style={{ marginTop: 14 }}>
-                  <span className="chip acc">{INTENT_LABEL[pet.intent]}</span>
-                  <span className="chip honey">{pet.energy === "HIGH" ? "High energy" : pet.energy === "LOW" ? "Calm" : "Balanced"}</span>
-                  {pet.size && <span className="chip">{pet.size[0] + pet.size.slice(1).toLowerCase()}</span>}
-                  <span className="chip">{pet.gender === "MALE" ? "Male" : "Female"}</span>
+                <div className="pf-section">
+                  <div className="pf-section__label">About {pet.name}</div>
+                  {pet.bio ? <p>{pet.bio}</p> : <p className="muted">No bio yet.</p>}
+                  {pet.favActivity && <p style={{ marginTop: 12, fontWeight: 600, color: "var(--fg)" }}>⭐ Favourite thing: {pet.favActivity}</p>}
+                  {pet.temperament && <p className="muted" style={{ marginTop: 10, fontSize: ".92rem" }}>Temperament: {pet.temperament}</p>}
                 </div>
-                {pet.temperament && <p className="muted" style={{ marginTop: 14, fontSize: ".92rem" }}>Temperament: {pet.temperament}</p>}
-                {pet.favActivity && <p style={{ marginTop: 12, fontWeight: 600, color: "var(--fg)" }}>⭐ Favourite thing: {pet.favActivity}</p>}
+
                 {pet.interests && (
-                  <>
-                    <p className="muted" style={{ marginTop: 16, fontSize: ".8rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px" }}>Their vibe</p>
-                    <div className="row" style={{ marginTop: 8 }}>
+                  <div className="pf-section">
+                    <div className="pf-section__label">Their vibe</div>
+                    <div className="row">
                       {pet.interests.split(",").map((t) => t.trim()).filter(Boolean).map((t) => <span key={t} className="chip honey">{t}</span>)}
                     </div>
-                  </>
+                  </div>
                 )}
+
+                <div className="pf-section">
+                  <div className="pf-section__label">Health &amp; safety</div>
+                  <div className="pf-health">
+                    <span className={"pf-health__item" + (pet.vaccinated ? " on" : "")}>💉 {pet.vaccinated ? "Vaccinated" : "Vaccination unconfirmed"}</span>
+                    {pet.healthVerified && <span className="pf-health__item on">🩺 Vet health-verified</span>}
+                    {pet.neutered && <span className="pf-health__item on">✂️ Neutered</span>}
+                    {pet.microchipVerified && <span className="pf-health__item on">🆔 Microchip verified</span>}
+                  </div>
+                </div>
+
+                <div className="pf-section">
+                  <div className="pf-section__label">Verified badges</div>
+                  <BadgeRow user={pet.user} pet={petPet} />
+                </div>
               </div>
             </div>
 
@@ -196,6 +211,15 @@ export default async function Profile(
       </section>
       <Footer />
     </>
+  );
+}
+
+function Stat({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="pf-stat">
+      <div className="pf-stat__k">{k}</div>
+      <div className="pf-stat__v">{v}</div>
+    </div>
   );
 }
 
