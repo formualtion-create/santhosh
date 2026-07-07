@@ -105,7 +105,7 @@ export default async function Stories(props: { searchParams: Promise<{ submitted
                 <div className="field"><label htmlFor="s-city">City</label><input id="s-city" name="city" defaultValue={user?.city || ""} placeholder="e.g. Bengaluru" /></div>
                 <div className="field"><label htmlFor="s-rating">Your rating</label><select id="s-rating" name="rating" defaultValue="5"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option></select></div>
               </div>
-              <div className="field"><label htmlFor="s-story">Your story *</label><textarea id="s-story" name="story" rows={4} required minLength={40} maxLength={1200} placeholder="How did PawsPair help your pet? Tell us what happened…" /></div>
+              <div className="field"><label htmlFor="s-story">Your story *</label><textarea id="s-story" name="story" rows={4} required minLength={15} maxLength={1200} placeholder="How did PawsPair help your pet? Tell us what happened…" /></div>
               <button className="btn btn-primary btn-lg btn-block" type="submit">Share my Happy Tail 🐾</button>
             </form>
           </div>

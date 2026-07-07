@@ -13,9 +13,18 @@ const PickerMap = dynamic(() => import("./PickerMap"), {
   loading: () => <div className="mapwrap" style={{ height: 260, display: "grid", placeItems: "center", color: "var(--muted-text)" }}>Loading map…</div>,
 });
 
-export default function LocationPicker() {
-  const [city, setCity] = useState("Bengaluru");
-  const [pos, setPos] = useState<[number, number]>(CITY["Bengaluru"]);
+export default function LocationPicker({
+  initialCity,
+  initialPos,
+}: {
+  initialCity?: string;
+  initialPos?: [number, number];
+} = {}) {
+  // If a known city is passed, honour it; otherwise fall back to "Other" so a
+  // custom pin (e.g. an existing member's saved coordinates) isn't mislabelled.
+  const startCity = initialCity && CITY[initialCity] ? initialCity : initialCity ? "Other" : "Bengaluru";
+  const [city, setCity] = useState(startCity);
+  const [pos, setPos] = useState<[number, number]>(initialPos || CITY["Bengaluru"]);
 
   const onCity = (c: string) => {
     setCity(c);

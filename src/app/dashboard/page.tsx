@@ -7,6 +7,7 @@ import { Nav, Footer, VerifiedTick } from "@/components/ui";
 import { TrustLevelChip } from "@/components/TrustBadges";
 import Map from "@/components/Map";
 import NotificationOptIn from "@/components/NotificationOptIn";
+import SwipeCard from "@/components/SwipeCard";
 
 const SPECIES_LABEL: Record<string, string> = { DOG: "Dog", CAT: "Cat", RABBIT: "Rabbit", BIRD: "Bird", OTHER: "Other" };
 const AGE_LABEL: Record<string, string> = { PUPPY: "Under 1 yr", YOUNG: "1–3 yrs", ADULT: "4–7 yrs", SENIOR: "8+ yrs" };
@@ -14,21 +15,6 @@ const INTENT_LABEL: Record<string, string> = { PLAYDATE: "Playdates", FRIENDSHIP
 const SORTS: { v: string; label: string }[] = [{ v: "score", label: "Best match" }, { v: "distance", label: "Nearest" }, { v: "newest", label: "Newest" }];
 
 function energyLabel(e: string) { return e === "HIGH" ? "High energy" : e === "LOW" ? "Calm" : "Balanced"; }
-
-function SwipeBtns({ petId, next }: { petId: string; next: string }) {
-  return (
-    <div className="row" style={{ gap: 8, padding: "0 18px 16px" }}>
-      <form action="/api/swipe" method="post" style={{ flex: 1 }}>
-        <input type="hidden" name="petId" value={petId} /><input type="hidden" name="action" value="PASS" /><input type="hidden" name="next" value={next} />
-        <button className="btn btn-ghost btn-block btn-sm" type="submit" aria-label="Pass">Pass</button>
-      </form>
-      <form action="/api/swipe" method="post" style={{ flex: 1 }}>
-        <input type="hidden" name="petId" value={petId} /><input type="hidden" name="action" value="LIKE" /><input type="hidden" name="next" value={next} />
-        <button className="btn btn-primary btn-block btn-sm" type="submit" aria-label="Like">♥ Like</button>
-      </form>
-    </div>
-  );
-}
 
 export default async function Dashboard(props: { searchParams: Promise<Record<string, string>> }) {
   const searchParams = await props.searchParams;
@@ -176,7 +162,7 @@ export default async function Dashboard(props: { searchParams: Promise<Record<st
               ) : (
                 <div className="grid g3 grid-stagger">
                   {pets.map((p) => (
-                    <div key={p.id} className="pcard">
+                    <SwipeCard key={p.id} petId={p.id} next={nextUrl}>
                       <Link href={`/profile/${p.id}`} aria-label={`View ${p.name}'s profile`}>
                         <div className="ph">
                           {p.photoUrl ? <img src={p.photoUrl} alt={p.name} className={p.photoBlurred ? "blurred" : ""} /> : <div style={{ display: "grid", placeItems: "center", height: "100%", fontSize: 48 }}>🐾</div>}
@@ -195,8 +181,7 @@ export default async function Dashboard(props: { searchParams: Promise<Record<st
                           </div>
                         </div>
                       </Link>
-                      <SwipeBtns petId={p.id} next={nextUrl} />
-                    </div>
+                    </SwipeCard>
                   ))}
                 </div>
               )}

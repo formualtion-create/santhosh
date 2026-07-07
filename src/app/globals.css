@@ -91,6 +91,12 @@ a{color:inherit;text-decoration:none}
 .pcard .ph img{width:100%;height:100%;object-fit:cover}
 .pcard .ph .score{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.94);color:var(--success);font-family:var(--font-d);font-weight:900;font-size:.78rem;padding:4px 11px;border-radius:var(--pill)}
 .pcard .pb{padding:16px 18px}
+/* Swipe-to-like/pass gesture (SwipeCard) */
+.swipecard{user-select:none;-webkit-user-select:none;will-change:transform}
+.swipecard img{-webkit-user-drag:none;user-select:none}
+.swipe-stamp{position:absolute;top:16px;z-index:6;font-family:var(--font-d);font-weight:900;font-size:1.5rem;letter-spacing:1.5px;padding:3px 12px;border-radius:10px;border:3px solid;text-transform:uppercase;pointer-events:none;opacity:0}
+.swipe-stamp--like{right:16px;color:var(--success);border-color:var(--success);transform:rotate(12deg)}
+.swipe-stamp--pass{left:16px;color:var(--danger);border-color:var(--danger);transform:rotate(-12deg)}
 .pcard h3{font-size:1.2rem;display:flex;align-items:center;gap:6px}
 .pcard__meta{font-size:.9rem;color:var(--muted-text);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .pcard__intent{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-family:var(--font-d);font-weight:700;font-size:.82rem;color:var(--primary-600)}

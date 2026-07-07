@@ -6,6 +6,7 @@ import { Nav, Footer } from "@/components/ui";
 import { BadgeRow, TrustLevelChip } from "@/components/TrustBadges";
 import { earnedBadges, getBadges } from "@/lib/trust";
 import DeleteAccount from "@/components/DeleteAccount";
+import LocationPicker from "@/components/LocationPicker";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,7 @@ export default async function Account(props: { searchParams: Promise<Record<stri
           <h1 className="h-sec" style={{ marginBottom: 18 }}>My account</h1>
 
           {searchParams.photo && <div className="ok">✓ Pet photo updated.</div>}
+          {searchParams.location && <div className="ok">✓ Location updated. Nearby matches will refresh.</div>}
           {searchParams.unblocked && <div className="ok">✓ Member unblocked.</div>}
           {searchParams.privacy && <div className="ok">✓ Privacy settings saved.</div>}
           {searchParams.notif && <div className="ok">✓ Notification settings saved.</div>}
@@ -45,6 +47,18 @@ export default async function Account(props: { searchParams: Promise<Record<stri
               <Field k="Phone" v={user.phone} /><Field k="City" v={user.city} />
               <Field k="ID on file" v={user.kycDocRef || "—"} /><Field k="Plan" v={user.plan[0] + user.plan.slice(1).toLowerCase()} />
             </div>
+          </div>
+
+          <div className="card" style={{ marginBottom: 18 }}>
+            <h3 style={{ marginBottom: 6 }}>Location</h3>
+            <p className="muted" style={{ fontSize: ".92rem", marginBottom: 14 }}>Moved, or set the wrong spot at signup? Update your city and exact location — we use it to find nearby companions and show distances.</p>
+            <form action="/api/account/location" method="post">
+              <LocationPicker
+                initialCity={user.city}
+                initialPos={user.lat != null && user.lng != null ? [user.lat, user.lng] : undefined}
+              />
+              <button className="btn btn-primary btn-sm" type="submit" style={{ marginTop: 6 }}>Save location</button>
+            </form>
           </div>
 
           <div className="card" style={{ marginBottom: 18 }}>

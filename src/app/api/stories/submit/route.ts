@@ -12,7 +12,7 @@ const schema = z.object({
   species: z.string().max(40).optional(),
   city: z.string().max(60).optional(),
   rating: z.coerce.number().min(1).max(5).default(5),
-  story: z.string().min(40, "Tell us a little more — at least a few sentences").max(1200),
+  story: z.string().trim().min(15, "Tell us a little more — a sentence or two").max(1200),
 });
 
 // Members (and visitors) can submit their own Happy Tail — stored as PENDING for
