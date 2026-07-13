@@ -482,5 +482,51 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   *{animation:none!important;transition:none!important}
   .section,.pageform,.memberstrip .m,.text-grad,.modal-overlay,.modal-card{animation:none!important}
   /* never leave entrance content invisible when motion is off */
-  .grid-stagger>*,.hero-anim>*,.hero-card,.tcard{opacity:1!important;transform:none!important}
+  .grid-stagger>*,.hero-anim>*,.hero-card,.tcard,[data-reveal]{opacity:1!important;transform:none!important}
 }
+
+/* ---- Scroll reveal: sections rise into view as you scroll ---- */
+[data-reveal]{opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+[data-reveal].is-visible{opacity:1;transform:none}
+
+/* ---- Live swipe demo (landing "see it in action") ---- */
+.demo-wrap{background:linear-gradient(135deg,#F5F3FF,#FCE7F3);border-radius:var(--r-lg);overflow:hidden}
+@media(max-width:760px){.demo-wrap{grid-template-columns:1fr!important;gap:22px!important;text-align:center}.demo-wrap .row{justify-content:center}}
+.demo-deck{position:relative;height:380px;width:100%;max-width:320px;margin:0 auto;perspective:1200px}
+.demo-card{position:absolute;inset:0;margin:auto;width:270px;height:344px;background:var(--surface);border-radius:22px;box-shadow:0 24px 50px -18px rgba(40,36,79,.42);overflow:hidden;display:flex;flex-direction:column;transform-origin:bottom center}
+.demo-card__img{position:relative;flex:1;background:var(--muted);overflow:hidden}
+.demo-card__img img{width:100%;height:100%;object-fit:cover}
+.demo-card__score{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.94);color:var(--success);font-family:var(--font-d);font-weight:900;font-size:.76rem;padding:4px 11px;border-radius:var(--pill)}
+.demo-card__body{padding:12px 16px 16px}
+.demo-card__body b{font-family:var(--font-d);font-size:1.15rem;color:var(--fg);display:block}
+.demo-card__body span{color:var(--muted-text);font-size:.84rem}
+.demo-stamp{position:absolute;top:18px;font-family:var(--font-d);font-weight:900;font-size:1.5rem;letter-spacing:1.5px;padding:3px 12px;border-radius:10px;border:3px solid;opacity:0}
+.demo-stamp--like{left:16px;color:var(--success);border-color:var(--success);transform:rotate(-12deg)}
+.demo-stamp--nope{right:16px;color:var(--danger);border-color:var(--danger);transform:rotate(12deg)}
+/* three fanned cards; the front one loops a gentle like/pass swipe */
+.demo-card--2{transform:translateY(14px) scale(.92) rotate(-4deg);filter:brightness(.97)}
+.demo-card--1{transform:translateY(7px) scale(.96) rotate(3deg)}
+.demo-card--0{z-index:3;animation:demoSwipe 6s var(--ease) infinite}
+.demo-card--0 .demo-stamp--like{animation:demoLike 6s var(--ease) infinite}
+.demo-card--0 .demo-stamp--nope{animation:demoNope 6s var(--ease) infinite}
+.demo-match{position:absolute;left:50%;bottom:16px;transform:translateX(-50%) scale(.8);z-index:5;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-family:var(--font-d);font-weight:800;font-size:.95rem;padding:9px 18px;border-radius:var(--pill);box-shadow:0 12px 30px -8px rgba(224,69,123,.6);opacity:0;animation:demoMatch 6s var(--ease) infinite}
+@keyframes demoSwipe{
+  0%,12%{transform:translateX(0) rotate(0)}
+  26%{transform:translateX(120%) rotate(16deg);opacity:1}
+  27%{opacity:0}
+  28%,49%{transform:translateX(0) rotate(0);opacity:1}   /* snap back as "next" card */
+  62%{transform:translateX(-120%) rotate(-16deg);opacity:1}
+  63%{opacity:0}
+  64%,100%{transform:translateX(0) rotate(0);opacity:1}
+}
+@keyframes demoLike{0%,14%{opacity:0}22%,27%{opacity:1}28%,100%{opacity:0}}
+@keyframes demoNope{0%,50%{opacity:0}58%,63%{opacity:1}64%,100%{opacity:0}}
+@keyframes demoMatch{0%,30%{opacity:0;transform:translateX(-50%) scale(.8)}38%,46%{opacity:1;transform:translateX(-50%) scale(1)}52%,100%{opacity:0;transform:translateX(-50%) scale(.8)}}
+
+/* ---- Animated stats band ---- */
+.statband{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:var(--r-lg);padding:34px 26px;box-shadow:var(--shadow)}
+.statband__item{text-align:center;color:#fff}
+.statband__emoji{font-size:1.7rem;margin-bottom:4px}
+.statband__num{font-family:var(--font-d);font-weight:900;font-size:clamp(1.7rem,3.4vw,2.4rem);line-height:1}
+.statband__label{font-size:.86rem;font-weight:600;opacity:.94;margin-top:6px}
+@media(max-width:680px){.statband{grid-template-columns:repeat(2,1fr);gap:24px 12px;padding:28px 18px}}

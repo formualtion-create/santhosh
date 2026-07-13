@@ -4,6 +4,9 @@ import { prisma } from "@/lib/db";
 import { Nav, Footer, VerifiedTick } from "@/components/ui";
 import { JsonLd, orgJsonLd, websiteJsonLd, serviceJsonLd, faqJsonLd, CITIES, citySlug } from "@/lib/seo";
 import { STORIES, TESTIMONIALS, type Testimonial } from "@/lib/stories";
+import LiveDemo from "@/components/LiveDemo";
+import StatBand from "@/components/StatBand";
+import ScrollReveal from "@/components/ScrollReveal";
 
 const FAQS = [
   { q: "Is PawsPair available in my city?", a: "Yes — PawsPair connects verified pet parents across Bengaluru, Mumbai, Delhi, Pune, Hyderabad, Chennai and more, with new cities added regularly." },
@@ -32,6 +35,7 @@ export default async function Home() {
   return (
     <>
       <JsonLd data={[orgJsonLd, websiteJsonLd, serviceJsonLd, faqJsonLd(FAQS)]} />
+      <ScrollReveal />
       <Nav user={user} />
 
       <section className="section hero-section">
@@ -82,8 +86,36 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* See it in action — live product demo (shows, doesn't just tell) */}
+      <section className="section" style={{ paddingTop: 0 }} data-reveal>
+        <div className="container">
+          <div className="card demo-wrap" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 30, alignItems: "center", padding: 34 }}>
+            <div>
+              <span className="eyebrow">See it in action ✨</span>
+              <h2 className="h-sec" style={{ marginTop: 6 }}>Swipe. Match. Meet.</h2>
+              <p className="lead" style={{ margin: "10px 0 18px", maxWidth: 460 }}>
+                Browse verified pets near you, swipe right on the ones you love, and when it&apos;s mutual you unlock a private,
+                encrypted chat. Finding your pet&apos;s next best friend feels less like paperwork — and more like play.
+              </p>
+              <div className="row">
+                <Link href="/signup" className="btn btn-primary btn-lg">Try it free</Link>
+                <Link href="/stories" className="btn btn-ghost btn-lg">See happy matches</Link>
+              </div>
+            </div>
+            <LiveDemo />
+          </div>
+        </div>
+      </section>
+
+      {/* By the numbers — animated stats band */}
+      <section className="section" style={{ paddingTop: 0 }} data-reveal>
+        <div className="container">
+          <StatBand />
+        </div>
+      </section>
+
       {/* Member photo strip — social proof + Gen-Z visual */}
-      <section className="section" style={{ paddingTop: 0 }}>
+      <section className="section" style={{ paddingTop: 0 }} data-reveal>
         <div className="container">
           <div className="spread" style={{ marginBottom: 14 }}>
             <h2 className="h-sec" style={{ fontSize: "1.5rem" }}>Loved by pet parents across India 🐾</h2>
@@ -98,7 +130,7 @@ export default async function Home() {
       </section>
 
       {/* Happy Tails — heart-warming stories */}
-      <section className="section" style={{ paddingTop: 0 }}>
+      <section className="section" style={{ paddingTop: 0 }} data-reveal>
         <div className="container">
           <div className="center" style={{ marginBottom: 26 }}>
             <span className="eyebrow">Happy Tails 🐾</span>
@@ -155,7 +187,7 @@ export default async function Home() {
       </section>
 
       {/* Newsletter CTA */}
-      <section className="section" style={{ paddingTop: 0 }}>
+      <section className="section" style={{ paddingTop: 0 }} data-reveal>
         <div className="container">
           <div className="card" style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap", justifyContent: "space-between", background: "linear-gradient(135deg,#F3E8FF,#FCE7F3)" }}>
             <div>
@@ -188,7 +220,7 @@ export default async function Home() {
       </section>
 
       {/* FAQ — visible + matches FAQPage schema */}
-      <section className="section" style={{ paddingTop: 0 }}>
+      <section className="section" style={{ paddingTop: 0 }} data-reveal>
         <div className="container" style={{ maxWidth: 760 }}>
           <h2 className="h-sec" style={{ marginBottom: 18 }}>Frequently asked questions</h2>
           <div className="grid-stagger" style={{ display: "grid", gap: 12 }}>
