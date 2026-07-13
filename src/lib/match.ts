@@ -67,7 +67,9 @@ export function compatibility(me: PetAttrs, them: PetAttrs, distanceKm: number):
     const ok = me.gender && them.gender && me.gender !== them.gender && me.species === them.species;
     if (ok) reasons.unshift("Family-planning compatible");
     else { score = Math.round(score * 0.6); reasons.unshift("Not ideal for family planning"); }
-    if (!them.healthVerified) reasons.push("Confirm a vet health check first");
+    // Keep the vet-check advisory right behind the headline so the 4-reason cap
+    // can't silently drop this safety note on an otherwise strong match.
+    if (!them.healthVerified) reasons.splice(1, 0, "Confirm a vet health check first");
   }
 
   return { score: Math.max(40, Math.min(99, Math.round(score))), reasons: reasons.slice(0, 4) };
