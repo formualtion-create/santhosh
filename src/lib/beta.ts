@@ -12,10 +12,19 @@ export function betaInviteRequired(): boolean {
   return !!(process.env.BETA_INVITE_CODE && process.env.BETA_INVITE_CODE.trim());
 }
 
+// A shareable public-beta code, baked into the invite link so a broadcast (e.g.
+// WhatsApp) lets people join in one click. Kept alongside the private
+// BETA_INVITE_CODE so the gate still deters bots and stays a kill-switch:
+// remove this constant (or the env var) to close public signups instantly.
+export const PUBLIC_BETA_CODE = "PAWSBETA";
+
 // Validate a submitted invite code (case-insensitive, trimmed).
-// If no code is configured, the gate is open and any value passes.
+// Passes if it matches the public code OR the configured private code.
+// If no private code is configured, the gate is open and any value passes.
 export function checkBetaCode(code: unknown): boolean {
+  const submitted = typeof code === "string" ? code.trim().toLowerCase() : "";
+  if (submitted && submitted === PUBLIC_BETA_CODE.toLowerCase()) return true;
   const required = process.env.BETA_INVITE_CODE?.trim();
   if (!required) return true;
-  return typeof code === "string" && code.trim().toLowerCase() === required.toLowerCase();
+  return submitted !== "" && submitted === required.toLowerCase();
 }

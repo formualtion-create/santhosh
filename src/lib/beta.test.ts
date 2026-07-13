@@ -48,4 +48,10 @@ describe("checkBetaCode", () => {
     expect(checkBetaCode(42)).toBe(false);
     expect(checkBetaCode(null)).toBe(false);
   });
+
+  it("always accepts the shareable public beta code, even alongside a private code", () => {
+    process.env.BETA_INVITE_CODE = "PAWS2026";
+    expect(checkBetaCode("PAWSBETA")).toBe(true);
+    expect(checkBetaCode("  pawsbeta ")).toBe(true);
+  });
 });
