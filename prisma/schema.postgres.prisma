@@ -286,6 +286,7 @@ model Feedback {
   category  String   // bug | idea | confusing | praise | other
   message   String
   url       String?  // page the tester was on
+  rating    Int?     // optional 1–5 overall experience rating
   status    String   @default("NEW") // NEW | SEEN | RESOLVED
   createdAt DateTime @default(now())
 

@@ -13,10 +13,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/signup" },
 };
 
-export default async function Signup(props: { searchParams: Promise<{ error?: string }> }) {
+export default async function Signup(props: { searchParams: Promise<{ error?: string; invite?: string }> }) {
   const searchParams = await props.searchParams;
   const user = await getCurrentUser();
   if (user) redirect("/dashboard");
+  const prefillCode = (searchParams.invite || "").trim();
 
   return (
     <>
@@ -38,7 +39,8 @@ export default async function Signup(props: { searchParams: Promise<{ error?: st
                 <p className="invite-box__sub">PawsPair is in private beta. Enter the invite code you were given to join.</p>
                 <div className="field" style={{ margin: 0 }}>
                   <label htmlFor="betaCode">Beta invite code *</label>
-                  <input id="betaCode" name="betaCode" required autoComplete="off" placeholder="Enter your code" />
+                  <input id="betaCode" name="betaCode" required autoComplete="off" placeholder="Enter your code" defaultValue={prefillCode} />
+                  {prefillCode && <p className="hint" style={{ marginTop: 6, color: "var(--success)" }}>✓ Invite code applied — you&apos;re good to go.</p>}
                 </div>
               </div>
             )}

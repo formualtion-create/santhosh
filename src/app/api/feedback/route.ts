@@ -25,6 +25,8 @@ export async function POST(req: NextRequest) {
   const category = typeof body.category === "string" && CATEGORIES.has(body.category) ? body.category : "other";
   const url = typeof body.url === "string" ? body.url.slice(0, 300) : null;
   const emailIn = typeof body.email === "string" ? body.email.trim().slice(0, 160) : "";
+  const ratingNum = typeof body.rating === "number" ? Math.round(body.rating) : NaN;
+  const rating = ratingNum >= 1 && ratingNum <= 5 ? ratingNum : null;
 
   if (message.length < 3) return NextResponse.json({ error: "Please add a little more detail." }, { status: 400 });
   if (message.length > 4000) return NextResponse.json({ error: "That's a bit long — please keep it under 4000 characters." }, { status: 400 });
@@ -38,6 +40,7 @@ export async function POST(req: NextRequest) {
       category,
       message,
       url,
+      rating,
     },
   });
 

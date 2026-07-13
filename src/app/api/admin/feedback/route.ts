@@ -9,9 +9,9 @@ export async function GET() {
   if (!me || me.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const items = await prisma.feedback.findMany({ orderBy: { createdAt: "desc" }, take: 5000 });
-  const header = ["Time", "Category", "Status", "Page", "User", "Email", "Message"];
+  const header = ["Time", "Category", "Rating", "Status", "Page", "User", "Email", "Message"];
   const rows = items.map((f) =>
-    [f.createdAt.toISOString(), f.category, f.status, f.url || "", f.userId || "", f.email || "", f.message].map(csvCell).join(",")
+    [f.createdAt.toISOString(), f.category, f.rating ?? "", f.status, f.url || "", f.userId || "", f.email || "", f.message].map(csvCell).join(",")
   );
   const csv = [header.map(csvCell).join(","), ...rows].join("\n");
 

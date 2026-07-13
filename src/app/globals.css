@@ -523,6 +523,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 @keyframes demoNope{0%,50%{opacity:0}58%,63%{opacity:1}64%,100%{opacity:0}}
 @keyframes demoMatch{0%,30%{opacity:0;transform:translateX(-50%) scale(.8)}38%,46%{opacity:1;transform:translateX(-50%) scale(1)}52%,100%{opacity:0;transform:translateX(-50%) scale(.8)}}
 
+/* ---- Feedback star rating ---- */
+.fb-stars{display:flex;gap:6px}
+.fb-star{background:none;border:none;cursor:pointer;font-size:1.8rem;line-height:1;color:var(--border);padding:2px;transition:transform .12s var(--ease),color .12s}
+.fb-star:hover{transform:scale(1.15)}
+.fb-star.on{color:var(--honey)}
+
 /* ---- Animated stats band ---- */
 .statband{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:var(--r-lg);padding:34px 26px;box-shadow:var(--shadow)}
 .statband__item{text-align:center;color:#fff}

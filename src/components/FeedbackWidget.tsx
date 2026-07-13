@@ -15,6 +15,7 @@ const CATS = [
 export default function FeedbackWidget({ signedIn }: { signedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState("bug");
+  const [rating, setRating] = useState(0);
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
@@ -47,7 +48,7 @@ export default function FeedbackWidget({ signedIn }: { signedIn: boolean }) {
   function close() {
     setOpen(false);
     // reset after the close animation so a reopened form is fresh
-    setTimeout(() => { setDone(false); setErr(null); setMessage(""); }, 250);
+    setTimeout(() => { setDone(false); setErr(null); setMessage(""); setRating(0); }, 250);
   }
 
   async function submit(e: React.FormEvent) {
@@ -60,6 +61,7 @@ export default function FeedbackWidget({ signedIn }: { signedIn: boolean }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           category,
+          rating: rating || undefined,
           message: message.trim(),
           email: email.trim() || undefined,
           url: typeof window !== "undefined" ? window.location.pathname : undefined,
@@ -101,6 +103,21 @@ export default function FeedbackWidget({ signedIn }: { signedIn: boolean }) {
                 <h3 className="modal-title" style={{ marginBottom: 4 }}>Tell us what you think</h3>
                 <p className="modal-sub" style={{ marginBottom: 16 }}>Bugs, confusion, ideas, or love — all of it helps.</p>
 
+                <div className="field">
+                  <label>How&apos;s your experience so far? <span className="muted" style={{ fontWeight: 400 }}>(optional)</span></label>
+                  <div className="fb-stars" role="radiogroup" aria-label="Rate your experience">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        className={"fb-star" + (n <= rating ? " on" : "")}
+                        aria-label={`${n} star${n > 1 ? "s" : ""}`}
+                        aria-pressed={n === rating}
+                        onClick={() => setRating(n === rating ? 0 : n)}
+                      >★</button>
+                    ))}
+                  </div>
+                </div>
                 <div className="field">
                   <label htmlFor="fb-cat">What kind of feedback?</label>
                   <select id="fb-cat" value={category} onChange={(e) => setCategory(e.target.value)}>

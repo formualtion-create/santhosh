@@ -12,3 +12,6 @@ next-env.d.ts
 
 # build info
 tsconfig.tsbuildinfo
+
+# Local baseline for the daily feedback monitor (not for commit)
+.feedback-baseline.txt
